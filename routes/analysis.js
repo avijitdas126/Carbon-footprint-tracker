@@ -9,7 +9,7 @@ analysis.post("/", async (req, res) => {
     const { text } = req.body;
 
     console.log(req.body);
-    
+
     if (!text) {
       return res.status(400).json({ error: "No text provided" });
     }
@@ -23,14 +23,15 @@ analysis.post("/", async (req, res) => {
         const response = await fetch(
           `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(
             item.item
-          )}&search_simple=1&json=1`
+          )}&search_simple=1&json=1&fields=ecoscore_score,ecoscore_data`
         );
         const data = await response.json();
         const firstProduct = data.products?.[0];
-        const agribalyse = firstProduct?.ecoscore_data?.agribalyse;
+        let agribalyse = firstProduct?.ecoscore_data?.agribalyse;
 
         if (!agribalyse) {
           console.warn(`No agribalyse data for ${item.item}`);
+             agribalyse= data
           return {
             item: item.item,
             co2_total_kg: 0,
