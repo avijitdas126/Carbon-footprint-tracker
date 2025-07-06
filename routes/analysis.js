@@ -5,7 +5,6 @@ const analysis = express.Router();
 
 analysis.post("/", async (req, res) => {
   try {
-
     const { text } = req.body;
 
     console.log(req.body);
@@ -31,7 +30,7 @@ analysis.post("/", async (req, res) => {
 
         if (!agribalyse) {
           console.warn(`No agribalyse data for ${item.item}`);
-             agribalyse= data
+          agribalyse = data;
           return {
             item: item.item,
             co2_total_kg: 0,
