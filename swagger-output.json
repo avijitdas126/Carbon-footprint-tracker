@@ -1,0 +1,182 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Carbon Footprint Tracker API",
+    "description": "API for tracking and analyzing carbon footprints of products. This API allows users to upload images of products, extract text using OCR, and analyze the carbon footprint based on the extracted information."
+  },
+  "host": "localhost:8000",
+  "basePath": "/v1",
+  "schemes": ["http"],
+  "paths": {
+    "/ping": {
+      "get": {
+        "description": "Health check endpoint",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/upload": {
+      "post": {
+        "summary": "Upload a file and extract text using OCR",
+        "tags": ["OCR"],
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "file",
+            "type": "file",
+            "required": true,
+            "description": "The file to upload and process."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully extracted text from the uploaded file.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "description": "The extracted text from the image."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No file was uploaded.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "No file uploaded"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error during upload or OCR processing.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analysis": {
+      "post": {
+        "summary": "Analyze carbon footprint of a product",
+        "tags": ["Analysis"],
+        "description": "Analyzes the carbon footprint of a product based on the provided item name.",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Text input",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["text"],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "example": "Frozen Mixed Veggies 188 098"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Carbon footprint analysis results",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/CarbonFootprintResult"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Invalid request body"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error during analysis processing.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "CarbonFootprintResult": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "type": "string",
+          "example": "Frozen Mixed Veggies"
+        },
+        "category": {
+          "type": "string",
+          "example": "Cauliflower, frozen, raw"
+        },
+        "co2_total_kg": {
+          "type": "number",
+          "example": 1.02
+        },
+        "co2_breakdown": {
+          "type": "object",
+          "properties": {
+            "agriculture": { "type": "number", "example": 0.32207883 },
+            "processing": { "type": "number", "example":  0.12037794 },
+            "packaging": { "type": "number", "example": 0.26232822 },
+            "transportation": { "type": "number", "example": 0.21781585 },
+            "distribution": { "type": "number", "example": 0.068654975 },
+            "consumption": { "type": "number", "example": 0.02525183}
+          }
+        },
+        "source": {
+          "type": "string",
+          "example": "Open Food Facts Agribalyse v3.1.1"
+        },
+        "message": {
+          "type": "string",
+          "example": "No carbon data found"
+        }
+      }
+    }
+  },
+  "apis": ["route.js", "./route/*.js"]
+}
